@@ -9,3 +9,9 @@ __pycache__
 *.db-shm
 *.db-journal
 .claude
+
+# --- lailara engagement scaffold ---
+client-data/
+client-output/
+engagement.yml
+engagement.yaml

@@ -46,3 +46,14 @@ screenshots/
 # deploy/staging artifacts
 .rv_stage.tgz
 *.tgz
+
+# --- lailara engagement scaffold ---
+# Client engagement data is runtime-only: never commit it, never deploy it.
+client-data/
+client-output/
+/engagement.yml
+/engagement.yaml
+# (engagement.demo.yml and engagement.example.yml stay committable)
+
+# Dated price_history mirror-archive dumps are derived snapshots; the DB is the source.
+data/*_mirror_archive_*.csv

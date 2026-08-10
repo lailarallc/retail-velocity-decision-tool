@@ -189,3 +189,35 @@
 **Scope:** Any bug fix to a data function whose result the UI displays and which has a baked short-circuit — promo_roi, portfolio_summary, shelf_defense, production, rationalization, pruning, pricing, launch, category benchmarks.
 
 **Do not:** Ship a calc/SQL-only fix for a baked-served surface and call it done because the pure-calc test is green — the test proves nothing about the served snapshot. Verify against the live/deployed view or the baked JSON, not just the unit test.
+
+## 2026-08-05: Kroger wholesale/trade gap → disclosed config proxy, NOT a platform schema change
+
+**Decision (Shawn, ratified):** `dim_products` carries no Kroger-specific
+wholesale/trade columns. Resolve this with the **disclosed-proxy convention**
+already used by product-data-health-audit — never by changing the platform
+schema.
+
+- **Pattern to copy:** PDHA `R/02_build_frames.R` + `engagement.demo.yml`. A
+  retailer with no per-SKU rate column falls back to a proxy retailer's rate,
+  named in `engagement.yml`:
+  ```yaml
+  rates:
+    trade_spend_proxy:
+      Kroger: "Regional Group"   # item master carries no trade_spend_pct_kroger
+  ```
+  The proxy is **config-driven**, defaults to `"Regional Group"` (so the demo is
+  unchanged), and is **disclosed on the output wherever the proxied number
+  appears** — never silently substituted.
+
+- **Why not change the schema:** adding Kroger wholesale/trade columns to
+  `dim_products` is an A7 **platform** work item, not engagement-program scope.
+  It would ripple into `canonical_values`, the drift-token set, and every golden
+  across the portfolio. Out of scope here; do not relitigate.
+
+- **Where it applies:** retail-velocity's current demo computes margin from
+  per-SKU COGS (`dim_products.cogs_per_unit` / `margin_per_unit`), so **no
+  current code path needs the proxy** — building one now would be a speculative
+  abstraction. The proxy is to be wired into the **client-mode intake build**
+  (the deferred pure-intake pass) at the point per-retailer trade rates enter,
+  following the PDHA implementation above, with the disclosure line on any
+  Kroger figure it drives.

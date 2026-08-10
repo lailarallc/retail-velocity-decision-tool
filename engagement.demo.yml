@@ -1,0 +1,38 @@
+# Lailara LLC — Retail Velocity engagement config (DEMO)
+# Canonical Cinderhaven identity; demo: true so the deploy guard ignores it.
+# The deployed dashboard renders from Postgres — this config exercises
+# client_mode.py on demo-shaped POS files under client-data/ (gitignored).
+client:
+  name: "Cinderhaven Provisions (demo)"
+engagement:
+  id: "CINDERHAVEN-DEMO"
+as_of_date: "2025-12-27"
+prepared_by: "Lailara LLC"
+demo: true
+basis:
+  week_convention: "week_ending_saturday"
+  scan_basis: "retail_scan"
+# ── Per-retailer trade-spend rates + the Kroger proxy (DECISIONS.md 2026-08-05) ──
+# The item master carries no Kroger rate; Kroger falls back to the proxy retailer's
+# rate, DISCLOSED on the Kroger row and in a methodology note — never silent.
+rates:
+  trade_spend_proxy:
+    Kroger: "Regional Group"
+  trade_spend_pct:
+    Walmart: 0.11
+    Costco: 0.08
+    Whole Foods: 0.10
+    Sprouts: 0.09
+    Regional Group: 0.09
+inputs:
+  scans: "client-data/scans.csv"
+  stores: "client-data/stores.csv"
+columns:
+  store_id: "store_id"
+  sku: "sku"
+  week_ending: "week_ending"
+  units_sold: "units_sold"
+  dollars_sold: "dollars_sold"
+  retailer: "retailer"
+thresholds:
+  fail_on_missing_required_column: true
