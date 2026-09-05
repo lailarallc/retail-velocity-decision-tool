@@ -41,6 +41,21 @@ app = Dash(
     update_title=None,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
     suppress_callback_exceptions=True,
+    meta_tags=[
+        {"name": "description", "content": "Eight decisions, from shelf defense to pricing power, worked on a 1.2M-row dataset."},
+        {"property": "og:title", "content": "Retail Velocity Decision Tool"},
+        {"property": "og:description", "content": "Eight decisions, from shelf defense to pricing power, worked on a 1.2M-row dataset."},
+        {"property": "og:type", "content": "website"},
+        {"property": "og:url", "content": "https://velocity.lailarallc.com/"},
+        {"property": "og:image", "content": "https://lailarallc.com/og/s/velocity.png"},
+        {"property": "og:image:secure_url", "content": "https://lailarallc.com/og/s/velocity.png"},
+        {"property": "og:image:type", "content": "image/png"},
+        {"property": "og:image:width", "content": "1200"},
+        {"property": "og:image:height", "content": "630"},
+        {"property": "og:image:alt", "content": "Retail Velocity Decision Tool"},
+        {"name": "twitter:card", "content": "summary_large_image"},
+        {"name": "twitter:image", "content": "https://lailarallc.com/og/s/velocity.png"},
+    ],
 )
 server = app.server
 init_cache(server)
