@@ -197,6 +197,12 @@ dollar figures corrected; no NameError; AA contrast passes (once deployed).
 
 ## Improvement History
 
+### 2026-09-23 — Audit (health check only)
+- **Findings:** 0 critical, 5 important, 3 nice-to-have
+- **Top concerns:** HANDOFF/PLAN stale since 2026-07-31 (21 commits incl. client mode unrecorded; audit was due 2026-08-30). Pitch export Production sheet turns missing case-pack into "0 cases" and rounds cases to whole numbers (HANDOFF next-step #1 still open). Stale app/Dockerfile + app/fly.toml conflict with the real deploy config; test_health.py never exercises the real /health route.
+- **Action taken:** Audit only — no fixes this session
+- **Next review:** 2026-10-21
+
 ### 2026-07-31 — Improvement pass (`/improve` + `/ce` review + `/ui review`)
 - **Trigger:** User-initiated combined review. Goal: CEO/CFO-ready, purpose clear in <30s. Constraint: no Postgres SSOT changes.
 - **What was reviewed:** 4-agent ce code review (correctness/calc, maintainability/Python, performance, testing), ui-review-skill against live site, 30-second comprehension read of the rendered landing page.
