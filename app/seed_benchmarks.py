@@ -20,6 +20,7 @@ import sys
 
 import psycopg2
 
+import prod_guard
 from constants import CATEGORY_MAP
 
 # Benchmark multipliers: category average velocity relative to Cinderhaven.
@@ -52,6 +53,7 @@ def main() -> None:
         print("ERROR: DATABASE_URL not set. Export it or add to .env.")
         sys.exit(1)
 
+    prod_guard.check(url)  # refuses a fly tunnel to production
     conn = psycopg2.connect(url, options="-c search_path=public_marts,public_staging,raw,public")
     try:
         conn.autocommit = True

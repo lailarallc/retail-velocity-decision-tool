@@ -6,6 +6,7 @@ stg_stores, stg_scan_data, stg_promotions, stg_price_history) and would
 overwrite the pipeline's authoritative data if run. Kept for reference only.
 
 Requires: fly proxy 15432:5432 --app cinderhaven-db running in background.
+Production runs now need ALLOW_PROD_DB=1 (prod_guard refuses a fly tunnel otherwise).
 
 Usage:
     set DATABASE_URL=postgres://user:pass@localhost:15432/cinderhaven
@@ -41,6 +42,8 @@ from typing import Any
 
 import psycopg2
 import psycopg2.extensions
+
+import prod_guard
 
 SQLITE_PATH = os.environ.get("SQLITE_PATH", "")
 PG_DSN = os.environ.get("DATABASE_URL", "postgres://localhost:15432/cinderhaven")
@@ -403,6 +406,7 @@ def main() -> None:
     print(f"Connecting to SQLite ({SQLITE_PATH})...")
     with sqlite3.connect(SQLITE_PATH) as sqlite_conn:
         print("Connecting to Postgres (via fly proxy)...")
+        prod_guard.check(PG_DSN)  # refuses a fly tunnel to production
         try:
             pg_conn = psycopg2.connect(PG_DSN, connect_timeout=5)
         except psycopg2.Error as e:
