@@ -1,0 +1,27 @@
+# Typed figures this repo prints with no canon key (owner, 2026-11-15; plan U19, U22).
+# One row per figure per location. The platform's fleet check holds the row count to a ceiling that only
+# falls: give a figure a key (or stop printing it) and delete its row. listed=yes: the read map names it, and
+# U19 owes its key; listed=no: U22 works it down. Generated from the 2026-11-15 manifest pass.
+file_line	printed	exact_value	meaning	source	kind	listed
+README.md:31	~$25M	25000000	company revenue scale, approximate	prose only (canon revenue.combined_invoiced.cy2025 = 25332687.28 is the nearest canonical figure)	prose-only	no
+README.md:31	50 SKUs	50	SKU universe, all time	reference/canonical_values.json universe.skus_total.all_time	prose-only	no
+README.md:31	five product lines	5	product-line count, all time	reference/canonical_values.json universe.product_lines.all_time	prose-only	no
+README.md:33	902 stores	902	store count in scan data	prose only (canon universe.stores_total.all_time = 640; 902 not traced)	prose-only	yes
+README.md:34	~500 doors	500	Walmart door count, approximate	prose only	prose-only	yes
+README.md:34	~80	80	Costco door count, approximate	prose only	prose-only	yes
+README.md:34	~120	120	Whole Foods door count, approximate	prose only	prose-only	yes
+README.md:34	6 contracted retailers	6	retailer count, all time	reference/canonical_values.json universe.retailers.all_time	prose-only	no
+README.md:35	3 distributors	3	distributor count, all time	reference/canonical_values.json universe.distributors.all_time	prose-only	no
+README.md:38	50-SKU set	50	SKU universe, all time	reference/canonical_values.json universe.skus_total.all_time	prose-only	no
+app/seed_benchmarks.py:35	0.92	0.92	category-to-Cinderhaven velocity ratio, Sauces & Marinades (written to stg_category_benchmarks)	constant app/seed_benchmarks.py:35	assumption	no
+app/seed_benchmarks.py:36	1.22	1.22	category-to-Cinderhaven velocity ratio, Condiments & Dressings	constant app/seed_benchmarks.py:36	assumption	no
+app/seed_benchmarks.py:37	1.35	1.35	category-to-Cinderhaven velocity ratio, Dry Grocery & Baking	constant app/seed_benchmarks.py:37	assumption	no
+engagement.demo.yml:22	Walmart: 0.11	11	Walmart trade-spend rate (demo config)	engagement.demo.yml:22; mirrors raw.sku_costs trade_spend_pct	assumption	no
+engagement.demo.yml:23	Costco: 0.08	8	Costco trade-spend rate (demo config)	engagement.demo.yml:23	assumption	no
+engagement.demo.yml:24	Whole Foods: 0.10	10	Whole Foods trade-spend rate (demo config)	engagement.demo.yml:24	assumption	no
+engagement.demo.yml:25	Sprouts: 0.09	9	Sprouts trade-spend rate (demo config)	engagement.demo.yml:25	assumption	no
+engagement.demo.yml:26	Regional Group: 0.09	9	Regional Group trade-spend rate, also Kroger proxy (demo config)	engagement.demo.yml:26	assumption	no
+tests/test_canonical_regression.py:11	$32,323,139.62	32323139.62	retail scan revenue cy2025 (docstring)	reference/canonical_values.json revenue.retail_scan.cy2025	prose-only	no
+tests/test_canonical_regression.py:153	9,943 cy2023 + 49 in 2025	9943	distribution authorizations cy2023 (docstring); 49 in cy2025	reference/canonical_values.json distribution.authorizations.cy2023 / .cy2025	prose-only	no
+tests/test_canonical_regression.py:16	13	13	Regional Group ROI-qualified promo subset (docstring)	prose only; derived at query time in Promo-ROI view	prose-only	no
+tests/test_canonical_regression.py:9	9,992 distribution authorizations	9992	distribution authorizations, trailing 36m (docstring)	reference/canonical_values.json distribution.authorizations.trailing_36m	prose-only	no
