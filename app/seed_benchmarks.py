@@ -2,10 +2,15 @@
 
 One-time script. Run with:  python seed_benchmarks.py
 
-Creates:
-  - category column on dim_products (maps product_line → market category)
+Creates, in this repo's own schema retail_velocity_decision_tool (U19a: no
+consumer writes a platform schema):
   - stg_category_benchmarks table with synthetic category-level velocity
     averages per retailer × week
+
+It reads the platform's marts and writes nothing there: each product line's
+market category comes from constants.CATEGORY_MAP, joined in the query, not
+from a column added to public_marts.dim_products. In production the schema is
+created by the platform's owner-run scripts/move_writer_tables.ps1.
 
 The benchmark data simulates what a category management platform would
 provide: the average velocity across ALL brands in a market category,
@@ -23,6 +28,8 @@ import psycopg2
 import prod_guard
 from constants import CATEGORY_MAP
 
+SCHEMA = "retail_velocity_decision_tool"
+TABLE = f"{SCHEMA}.stg_category_benchmarks"
 # Benchmark multipliers: category average velocity relative to Cinderhaven.
 # > 1.0 means the category average is higher (Cinderhaven underperforms).
 # < 1.0 means Cinderhaven outperforms the category.
@@ -60,25 +67,25 @@ def main() -> None:
         cur = conn.cursor()
 
         # ----------------------------------------------------------
-        # Step 1: Add category column to dim_products
+        # Step 1: Product line → market category, from CATEGORY_MAP
+        # (read in the query below; the platform's dim_products is not altered)
         # ----------------------------------------------------------
-        print("Adding category column to dim_products...")
-        cur.execute("""
-            ALTER TABLE dim_products ADD COLUMN IF NOT EXISTS category TEXT
-        """)
+        lines_by_category: dict[str, list[str]] = {}
         for product_line, category in CATEGORY_MAP.items():
-            cur.execute(
-                "UPDATE dim_products SET category = %s WHERE product_line = %s",
-                (category, product_line),
-            )
+            lines_by_category.setdefault(category, []).append(product_line)
             print(f"  {product_line} → {category}")
 
         # ----------------------------------------------------------
-        # Step 2: Create stg_category_benchmarks table
+        # Step 2: Create the benchmarks table in this repo's schema
         # ----------------------------------------------------------
-        print("\nCreating stg_category_benchmarks table...")
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS stg_category_benchmarks (
+        cur.execute("SELECT 1 FROM pg_namespace WHERE nspname = %s", (SCHEMA,))
+        if cur.fetchone() is None:
+            # Only a missing schema is made here: Postgres tests the
+            # database privilege before IF NOT EXISTS.
+            cur.execute(f"CREATE SCHEMA {SCHEMA}")
+        print(f"\nCreating {TABLE} table...")
+        cur.execute(f"""
+            CREATE TABLE IF NOT EXISTS {TABLE} (
                 category     TEXT    NOT NULL,
                 retailer     TEXT    NOT NULL,
                 week_ending  DATE    NOT NULL,
@@ -86,7 +93,7 @@ def main() -> None:
                 PRIMARY KEY (category, retailer, week_ending)
             )
         """)
-        cur.execute("DELETE FROM stg_category_benchmarks")
+        cur.execute(f"DELETE FROM {TABLE}")
 
         # ----------------------------------------------------------
         # Step 3: Compute Cinderhaven's velocity and scale to category
@@ -105,8 +112,8 @@ def main() -> None:
                 ret_adj = RETAILER_ADJUSTMENTS.get(retailer, 1.05)
                 final_mult = mult * ret_adj
 
-                cur.execute("""
-                    INSERT INTO stg_category_benchmarks
+                cur.execute(f"""
+                    INSERT INTO {TABLE}
                         (category, retailer, week_ending, avg_velocity)
                     SELECT
                         %s AS category,
@@ -116,12 +123,12 @@ def main() -> None:
                     FROM fct_scan_data d
                     JOIN dim_stores s ON d.store_id = s.store_id
                     JOIN dim_products pm ON d.sku = pm.sku
-                    WHERE pm.category = %s
+                    WHERE pm.product_line = ANY(%s)
                       AND s.retailer = %s
                     GROUP BY d.week_ending
                     ON CONFLICT (category, retailer, week_ending)
                     DO UPDATE SET avg_velocity = EXCLUDED.avg_velocity
-                """, (category, retailer, final_mult, category, retailer))
+                """, (category, retailer, final_mult, lines_by_category.get(category, []), retailer))
                 rows = cur.rowcount
                 total_rows += rows
                 print(f"  {category} × {retailer}: {rows} weeks")
@@ -131,12 +138,12 @@ def main() -> None:
         # ----------------------------------------------------------
         # Verify
         # ----------------------------------------------------------
-        cur.execute("SELECT COUNT(*) FROM stg_category_benchmarks")
-        print(f"Verification: {cur.fetchone()[0]} rows in stg_category_benchmarks")
+        cur.execute(f"SELECT COUNT(*) FROM {TABLE}")
+        print(f"Verification: {cur.fetchone()[0]} rows in {TABLE}")
 
-        cur.execute("""
+        cur.execute(f"""
             SELECT category, retailer, ROUND(AVG(avg_velocity), 2) AS avg_v
-            FROM stg_category_benchmarks
+            FROM {TABLE}
             GROUP BY category, retailer
             ORDER BY category, retailer
         """)
