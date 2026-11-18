@@ -140,6 +140,14 @@
 
 **Do not:** Load this table via reload_postgres.py (disabled) or any process that overwrites platform-managed tables.
 
+## 2026-11-17: reload_postgres.py deleted (supersedes "do not delete" below)
+
+**Decision:** Deleted `reload_postgres.py` and its prod-guard test. Its reference copy is the git history (last at `682c333`).
+
+**Why:** It DROP/CREATEs platform tables (`dim_products`, `stg_*`) unqualified, so on any search path it writes into the platform's schemas. No consumer writes a platform schema (Cinderhaven spec DECISIONS#u19-start, owner, 2026-11-14). Naming a schema of this repo's own was the other option; it would keep a loader nothing runs, recreating platform-shaped tables under this repo's name. The platform's dbt build owns those tables.
+
+**Scope:** `reload_postgres.py` and `tests/test_prod_guard_wiring.py::test_reload_postgres_refuses_fly_tunnel`. `app/seed_benchmarks.py` keeps its guard and test.
+
 ## 2026-06-03: reload_postgres.py disabled with hard guard
 
 **Decision:** Added a _guard() function that exits with a clear message before any code runs. The file body is intact but unreachable.
